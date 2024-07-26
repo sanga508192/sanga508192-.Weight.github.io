@@ -1,0 +1,214 @@
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำนวนน้ำหนักพัสดุ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 40px;
+            background-image: url('construction.jpeg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+            color: white; /* สีตัวอักษรเพื่อความชัดเจน */
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            background-color: rgba(135, 16, 139, 0.7); /* สีพื้นหลังโปร่งแสง */
+            padding: 10px;
+            border-radius: 80px;
+            margin-top: 2.5cm; /* ขยับหัวเรื่องลงมาประมาณ 2.5 เซนติเมตร */
+        }
+        form {
+            max-width: 700px;
+            font-size: 1.5em;
+            margin: auto;
+            padding: 30px;
+            background-color: rgba(252, 250, 250, 0.819);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+            color: black; /* สีตัวอักษรในฟอร์ม */
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        label {
+            width: 100px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 100px;
+            font-size: 2em;
+            text-align: center;
+            font-weight: bold;
+            max-width: auto;
+            margin: 0.9em;
+            padding: 30px;
+            background-color: rgba(252, 250, 250, 0.819);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+            color: black; /* สีตัวอักษรในฟอร์ม */
+
+        }
+        #logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0px;
+        }
+        #logo-cis {
+            width: 150px; /* ปรับขนาดตามความเหมาะสม */
+            margin-top: 190px;
+        }
+        #watermark {
+            text-align: center;
+            font-size: 0.9em;
+            color: #191817;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+    <h1>คำนวนน้ำหนักพัสดุชำรุดส่งคืนคลัง</h1>
+    <form id="weightForm">
+        <div class="item">
+            <label for="itemCode1">รหัสพัสดุ:</label>
+            <input type="text" id="itemCode1" required>
+            <label for="quantity1">จำนวน:</label>
+            <input type="number" id="quantity1" required>
+        </div>
+        <button type="button" onclick="addItem()">เพิ่มพัสดุ</button>
+        <button type="submit">คำนวนน้ำหนัก</button>
+    </form>
+    <div id="result"></div>
+    <div id="logos">
+        <img id="logo-cis" src="CIS.png" alt="CIS Logo">
+    </div>
+    <div id="watermark">WEBSITE BY CONSTRUCTION PEA CHAIYAPHUM </div>
+
+    <script>
+        const weightData = {
+            '1-01-011-0200': { name: 'สลักเกลียว เอ็ม 16x130 มม.',         weight: 0.27 },
+            '1-01-011-0201': { name: 'สลักเกลียว เอ็ม 16x170 มม.',         weight: 0.33 },
+            '1-01-011-0202': { name: 'สลักเกลียว เอ็ม 16x200 มม.',         weight: 0.38 },
+            '1-01-011-0203': { name: 'สลักเกลียว เอ็ม 16x250 มม.',         weight: 0.43 },
+            '1-01-011-0204': { name: 'สลักเกลียว เอ็ม 16x300 มม.',         weight: 0.52 },
+            '1-01-011-0205': { name: 'สลักเกลียว เอ็ม 16x350 มม.',         weight: 0.6 },
+            '1-01-011-0206': { name: 'สลักเกลียว เอ็ม 16x400 มม.',         weight: 0.65 },
+            '1-01-011-0207': { name: 'สลักเกลียว เอ็ม 16x450 มม.',         weight: 0.74 },
+            '1-01-011-0208': { name: 'สลักเกลียว เอ็ม 16x500 มม.',         weight: 0.8 },
+            '1-01-011-0209': { name: 'สลักเกลียว เอ็ม 16x600 มม.',         weight: 0.84 },
+            '1-01-012-0000': { name: 'สลักเกลียวตลอด เอ็ม 16x400 มม.',     weight: 0.7 },
+            '1-01-012-0001': { name: 'สลักเกลียวตลอด เอ็ม 16x450 มม.',     weight: 0.77 },
+            '1-01-013-0000': { name: 'สลักเกลียวห่วงกลม เอ็ม 16x400 มม.',   weight: 0.75 },
+            '1-01-013-0001': { name: 'สลักเกลียวห่วงกลม เอ็ม 16x450 มม.',   weight: 0.82 },
+            '1-01-013-0002': { name: 'สลักเกลียวห่วงกลม เอ็ม 16x500 มม.',   weight: 0.88 },
+            '1-01-013-0003': { name: 'สลักเกลียวห่วงกลม เอ็ม 16x650 มม.',   weight: 1.12 },
+            '1-01-014-0001': { name: 'สลักห่วงกลม เอ็ม 16x200 มม.',        weight: 0.45 },
+            '1-01-014-0002': { name: 'สลักห่วงกลม เอ็ม 16x250 มม.',        weight: 0.54 },
+            '1-01-016-0000': { name: 'สตัดโบลท์ เอ็ม 24x600 มม.',          weight: 2.0 },
+            '1-01-016-0001': { name: 'สตัดโบลท์ เอ็ม 24x800 มม.',          weight: 3.0 },
+            '1-01-016-0002': { name: 'สตัดโบลท์ เอ็ม 24x1,000 มม.',        weight: 3.5 },
+            '1-01-018-0001': { name: 'นัทรูปห่วง เอ็ม 16 คืน 582',           weight: 0.25 },
+            '1-01-018-0100': { name: 'แหวนรองแบบเรียบ',                  weight: 0.07 },
+            '1-01-018-0201': { name: 'แหวนสี่เหลี่ยมโค้ง',                   weight: 0.1 },
+            '1-01-020-0001': { name: 'เหล็กประกับไม้คอน ขนาด 30x6 มม.',    weight: 1.0 },
+            '1-01-021-0201': { name: 'สลักห่วง แบบธรรมดาเดี่ยว 45 องศา',    weight: 0.65 },
+            '1-01-021-0300': { name: 'แผ่นห่วง สำหรับสายขึ้น โยง 30 องศา',    weight: 0.4 },
+            '1-02-013-0001': { name: 'คอนเนคเตอร์ 50-70 ตร.มม.',         weight: 0.17 },
+            '1-02-031-0002': { name: 'คอนเนคเตอร์ 95-120 ตร.มม.',        weight: 0.35 },
+            '1-02-033-0000': { name: 'เบลแคลมป์ 25-50 ตร.มม.',           weight: 0.48 },
+            '1-02-033-0001': { name: 'เบลแคลมป์ 70-185 ตร.มม.',          weight: 0.87 },
+            '1-02-033-0100': { name: 'ฮอทไลน์แคลมป์ 25-50 ตร.มม.',        weight: 0.27 },
+            '1-02-033-0101': { name: 'ฮอทไลน์แคลมป์ 50-120 ตร.มม.',       weight: 0.3 },
+            '1-02-044-0102': { name: 'กายแคลมป์สลัก 3 ตัว',                weight: 1.0 },
+            '1-02-044-0103': { name: 'ห่วงแขวนเคเบิลสเปเซอร์',              weight: 0.2 },
+            '1-02-044-0105': { name: 'เหล็กลอนเคเบิลอากาศทางตรง',         weight: 6.5 },
+            '1-02-044-0112': { name: 'เหล็กลอนเคเบิลอากาศทางโค้ง',         weight: 26.5 },
+            '1-03-001-0002': { name: 'ลูกถ้วยไลน์โพสต์ไทป์ 22 กิโลโวลต์',      weight: 1.5},
+            '1-03-002-0000': { name: 'ลูกถ้วยแขวนแบบ ก 52-1',             weight: 1.0},
+            '1-03-002-6001': { name: 'ลูกถ้วยแขวนแบบ ค 52-3',             weight: 1.0},
+            '1-03-011-0000': { name: 'สเตรนแคลมป์ 35-70 ตร.มม.',         weight: 0.6},
+            '1-03-011-0004': { name: 'สเตรนแคลมป์ 185 ตร.มม.',           weight: 0.94},
+            '1-03-013-0000': { name: 'แร็ค 2x200 มม.',                   weight: 2.0},
+            '1-03-013-0001': { name: 'แร็ค 3x200 มม.',                   weight: 3.0},
+            '1-03-013-0002': { name: 'แร็ค 4x200 มม.',                   weight: 4.0},
+            '1-03-013-0100': { name: 'ที่จับลูกรอก',                        weight: 1.0},
+            '1-03-014-0011': { name: 'ทิมเบิลเคลวิส',                      weight: 0.4},
+            '1-04-000-0000': { name: 'ล่อฟ้า 20-21 กิโลโวลต์ 5 กิโลแอมป์',    weight: 1.0},
+            '1-04-001-0000': { name: 'คัทเอาท์',                          weight: 1.0},
+            '1-04-002-0100': { name: 'ฟิวส์สวิตช์แรงต่ำ 1x400 แอมป์',          weight: 1.0},
+            '1-04-005-0000': { name: 'คอนเนคติ้งสวิตช์ 1 ขา',               weight: 35.0},
+            '1-01-000-0100': { name: 'เหล็กรูปรางน้ำ',                      weight: 20.0},
+            '1-01-001-0003': { name: 'เหล็กฉาก',                         weight: 13.0},
+            '1-01-020-0004': { name: 'เหล็กประกับไม้ลอน ท้าวแขน',           weight: 7.0},
+            '1-01-011-0401': { name: 'สลักเกลียวหัวหกเหลี่ยม',               weight: 1.0},
+            '1-05-01-00002': { name: 'เหล็กแขวนท่อ พีวีซี. 5',               weight: 0.5},
+            '1-05-010-0003': { name: 'เหล็กขอบถังหม้อแปลง',                weight: 0.5},
+            // เพิ่มข้อมูลอื่น ๆ ตามที่มีในตาราง
+};
+
+let itemCount = 1;
+
+function addItem() {
+    itemCount++;
+    const newItem = document.createElement('div');
+    newItem.className = 'item';
+    newItem.innerHTML = `
+        <label for="itemCode${itemCount}">รหัสพัสดุ:</label>
+        <input type="text" id="itemCode${itemCount}" required>
+        <label for="quantity${itemCount}">จำนวน:</label>
+        <input type="number" id="quantity${itemCount}" required>
+    `;
+    document.getElementById('weightForm').insertBefore(newItem, document.querySelector('button[type="button"]'));
+}
+
+document.getElementById('weightForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    let totalWeight = 0;
+    let details = '';
+
+    for (let i = 1; i <= itemCount; i++) {
+        const itemCode = document.getElementById(`itemCode${i}`).value.trim();
+        const quantity = parseInt(document.getElementById(`quantity${i}`).value, 10);
+        const itemData = weightData[itemCode];
+
+        if (itemData) {
+            totalWeight += itemData.weight * quantity;
+            details += `รายการที่ ${i}: ${itemData.name}, จำนวน: ${quantity}, น้ำหนักรวม: ${(itemData.weight * quantity).toFixed(2)} กิโลกรัม\n`;
+        } else {
+            document.getElementById('result').innerText = `ไม่พบรหัสพัสดุ: ${itemCode} ในระบบ`;
+            return;
+        }
+    }
+    document.getElementById('result').innerText = `น้ำหนักรวม: ${totalWeight.toFixed(2)} กิโลกรัม\nรายละเอียด:\n${details}`;
+});
+</script>
+</body>
+</html>
