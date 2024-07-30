@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -14,15 +15,15 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;
-            color: white; /* สีตัวอักษรเพื่อความชัดเจน */
+            color: white;
         }
         h1 {
             text-align: center;
             color: #ffffff;
-            background-color: rgba(135, 16, 139, 0.7); /* สีพื้นหลังโปร่งแสง */
+            background-color: rgba(135, 16, 139, 0.7);
             padding: 10px;
             border-radius: 80px;
-            margin-top: 2.5cm; /* ขยับหัวเรื่องลงมาประมาณ 2.5 เซนติเมตร */
+            margin-top: 2.5cm;
         }
         form {
             max-width: 700px;
@@ -32,7 +33,7 @@
             background-color: rgba(252, 250, 250, 0.819);
             border-radius: 20px;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
-            color: black; /* สีตัวอักษรในฟอร์ม */
+            color: black;
         }
         .item {
             display: flex;
@@ -63,7 +64,7 @@
             background-color: #0056b3;
         }
         #result {
-            margin-top: 100px;
+            margin-top: 20px;
             font-size: 2em;
             text-align: center;
             font-weight: bold;
@@ -73,8 +74,7 @@
             background-color: rgba(252, 250, 250, 0.819);
             border-radius: 20px;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
-            color: black; /* สีตัวอักษรในฟอร์ม */
-
+            color: black;
         }
         #logos {
             display: flex;
@@ -83,14 +83,33 @@
             margin-bottom: 0px;
         }
         #logo-cis {
-            width: 150px; /* ปรับขนาดตามความเหมาะสม */
-            margin-top: 190px;
+            width: 150px;
+            margin-top: 20px;
         }
         #watermark {
             text-align: center;
             font-size: 0.9em;
             color: #191817;
             margin: 0px;
+        }
+        table {
+            width: 100%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: rgba(252, 250, 250, 0.819);
+            color: black;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
         }
     </style>
 </head>
@@ -99,7 +118,7 @@
     <form id="weightForm">
         <div class="item">
             <label for="itemCode1">รหัสพัสดุ:</label>
-            <input type="text" id="itemCode1" required>
+            <input list="itemCodes" id="itemCode1" required>
             <label for="quantity1">จำนวน:</label>
             <input type="number" id="quantity1" required>
         </div>
@@ -111,6 +130,23 @@
         <img id="logo-cis" src="CIS.png" alt="CIS Logo">
     </div>
     <div id="watermark">WEBSITE BY CONSTRUCTION PEA CHAIYAPHUM </div>
+
+    <datalist id="itemCodes">
+        <!-- JavaScript will dynamically populate this -->
+    </datalist>
+
+    <table>
+        <thead>
+            <tr>
+                <th>รหัสพัสดุ</th>
+                <th>ชื่อพัสดุ</th>
+                <th>น้ำหนัก (กิโลกรัม)</th>
+            </tr>
+        </thead>
+        <tbody id="weightTable">
+            <!-- JavaScript will dynamically populate this -->
+        </tbody>
+    </table>
 
     <script>
         const weightData = {
@@ -172,7 +208,25 @@
             '1-05-01-00002': { name: 'เหล็กแขวนท่อ พีวีซี. 5',               weight: 0.5},
             '1-05-010-0003': { name: 'เหล็กขอบถังหม้อแปลง',                weight: 0.5},
             // เพิ่มข้อมูลอื่น ๆ ตามที่มีในตาราง
-};
+        };
+
+// Populate the datalist with item codes
+const itemCodesList = document.getElementById('itemCodes');
+for (const code in weightData) {
+    const option = document.createElement('option');
+    option.value = code;
+    option.text = `${code} - ${weightData[code].name}`;
+    itemCodesList.appendChild(option);
+}
+
+// Populate the table with weight data
+const weightTable = document.getElementById('weightTable');
+for (const code in weightData) {
+    const item = weightData[code];
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${code}</td><td>${item.name}</td><td>${item.weight}</td>`;
+    weightTable.appendChild(row);
+}
 
 let itemCount = 1;
 
@@ -182,7 +236,7 @@ function addItem() {
     newItem.className = 'item';
     newItem.innerHTML = `
         <label for="itemCode${itemCount}">รหัสพัสดุ:</label>
-        <input type="text" id="itemCode${itemCount}" required>
+        <input list="itemCodes" id="itemCode${itemCount}" required>
         <label for="quantity${itemCount}">จำนวน:</label>
         <input type="number" id="quantity${itemCount}" required>
     `;
