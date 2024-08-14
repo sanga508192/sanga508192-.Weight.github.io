@@ -121,11 +121,12 @@
             <input list="itemCodes" id="itemCode1" required>
             <label for="quantity1">จำนวน:</label>
             <input type="number" id="quantity1" required>
+            <button type="button" onclick="removeItem('item1')">ลบ</button>
             
         </div>
         <button type="button" onclick="addItem()">เพิ่มพัสดุ</button>
         <button type="submit">คำนวนน้ำหนัก</button>
-        <button type="button" onclick="removeItem('item1')">ลบ</button>
+        
     </form>
     <div id="result"></div>
     <div id="logos">
