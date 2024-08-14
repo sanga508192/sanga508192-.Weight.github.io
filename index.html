@@ -59,6 +59,7 @@
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            margin-left: 10px;
         }
         button:hover {
             background-color: #0056b3;
@@ -116,12 +117,12 @@
 <body>
     <h1>คำนวนน้ำหนักพัสดุชำรุดส่งคืนคลัง</h1>
     <form id="weightForm">
-        <div class="item">
+        <div class="item" id="item1">
             <label for="itemCode1">รหัสพัสดุ:</label>
             <input list="itemCodes" id="itemCode1" required>
             <label for="quantity1">จำนวน:</label>
             <input type="number" id="quantity1" required>
-            <button type="button" onclick="removeItem(this)">ลบ</button>
+            <button type="button" onclick="removeItem('item1')">ลบ</button>
         </div>
         <button type="button" onclick="addItem()">เพิ่มพัสดุ</button>
         <button type="submit">คำนวนน้ำหนัก</button>
@@ -348,7 +349,7 @@
             // เพิ่มข้อมูลอื่น ๆ ตามที่มีในตาราง
             };
 
- // Populate the datalist with item codes
+// Populate the datalist with item codes
         const itemCodesList = document.getElementById('itemCodes');
         for (const code in weightData) {
             const option = document.createElement('option');
@@ -372,19 +373,22 @@
             itemCount++;
             const newItem = document.createElement('div');
             newItem.className = 'item';
+            newItem.id = `item${itemCount}`;
             newItem.innerHTML = `
                 <label for="itemCode${itemCount}">รหัสพัสดุ:</label>
                 <input list="itemCodes" id="itemCode${itemCount}" required>
                 <label for="quantity${itemCount}">จำนวน:</label>
                 <input type="number" id="quantity${itemCount}" required>
-                <button type="button" onclick="removeItem(this)">ลบ</button>
+                <button type="button" onclick="removeItem('item${itemCount}')">ลบ</button>
             `;
             document.getElementById('weightForm').insertBefore(newItem, document.querySelector('button[type="button"]'));
         }
 
-        function removeItem(button) {
-            const itemDiv = button.parentElement;
-            itemDiv.remove();
+        function removeItem(itemId) {
+            const itemElement = document.getElementById(itemId);
+            if (itemElement) {
+                itemElement.remove();
+            }
         }
 
         document.getElementById('weightForm').addEventListener('submit', function(event) {
@@ -393,23 +397,21 @@
             let details = '';
 
             for (let i = 1; i <= itemCount; i++) {
-                const itemCode = document.getElementById(`itemCode${i}`);
-                const quantity = document.getElementById(`quantity${i}`);
-                if (itemCode && quantity) {
-                    const codeValue = itemCode.value.trim();
-                    const quantityValue = parseInt(quantity.value, 10);
-                    const itemData = weightData[codeValue];
+                const itemElement = document.getElementById(`item${i}`);
+                if (itemElement) {
+                    const itemCode = document.getElementById(`itemCode${i}`).value.trim();
+                    const quantity = parseInt(document.getElementById(`quantity${i}`).value, 10);
+                    const itemData = weightData[itemCode];
 
                     if (itemData) {
-                        totalWeight += itemData.weight * quantityValue;
-                        details += `รายการที่ ${i}: ${itemData.name}, จำนวน: ${quantityValue}, น้ำหนักรวม: ${(itemData.weight * quantityValue).toFixed(2)} กิโลกรัม\n`;
+                        totalWeight += itemData.weight * quantity;
+                        details += `รายการที่ ${i}: ${itemData.name}, จำนวน: ${quantity}, น้ำหนักรวม: ${(itemData.weight * quantity).toFixed(2)} กิโลกรัม\n`;
                     } else {
-                        document.getElementById('result').innerText = `ไม่พบรหัสพัสดุ: ${codeValue} ในระบบ`;
+                        document.getElementById('result').innerText = `ไม่พบรหัสพัสดุ: ${itemCode} ในระบบ`;
                         return;
                     }
                 }
             }
-
             document.getElementById('result').innerText = `น้ำหนักรวม: ${totalWeight.toFixed(2)} กิโลกรัม\nรายละเอียด:\n${details}`;
         });
     </script>
