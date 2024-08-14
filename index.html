@@ -122,7 +122,7 @@
             background-color: #007BFF;
             color: white;
         }
-    </style>
+</style>
 </head>
 <body>
     <h1>คำนวนน้ำหนักพัสดุชำรุดส่งคืนคลัง</h1>
@@ -362,65 +362,69 @@
             };
 
 // Populate the datalist with item codes
-const itemCodesList = document.getElementById('itemCodes');
-for (const code in weightData) {
-    const option = document.createElement('option');
-    option.value = code;
-    option.text = `${code} - ${weightData[code].name}`;
-    itemCodesList.appendChild(option);
-}
-
-// Populate the table with weight data
-const weightTable = document.getElementById('weightTable');
-for (const code in weightData) {
-    const item = weightData[code];
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${code}</td><td>${item.name}</td><td>${item.weight}</td>`;
-    weightTable.appendChild(row);
-}
-
-let itemCount = 1;
-
-function addItem() {
-    itemCount++;
-    const newItem = document.createElement('div');
-    newItem.className = 'item';
-    newItem.innerHTML = `
-        <label for="itemCode${itemCount}">รหัสพัสดุ:</label>
-        <input list="itemCodes" id="itemCode${itemCount}" required>
-        <label for="quantity${itemCount}">จำนวน:</label>
-        <input type="number" id="quantity${itemCount}" required>
-        <button type="button" class="remove-button" onclick="removeItem(this)">ลบ</button>
-    `;
-    document.getElementById('itemsContainer').appendChild(newItem);
-}
-
-function removeItem(button) {
-    const item = button.parentElement;
-    item.remove();
-}
-
-document.getElementById('weightForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    let totalWeight = 0;
-    let details = '';
-
-    for (let i = 1; i <= itemCount; i++) {
-        const itemCode = document.getElementById(`itemCode${i}`).value.trim();
-        const quantity = parseInt(document.getElementById(`quantity${i}`).value, 10);
-        const itemData = weightData[itemCode];
-
-        if (itemData) {
-            totalWeight += itemData.weight * quantity;
-            details += `รายการที่ ${i}: ${itemData.name}, จำนวน: ${quantity}, น้ำหนักรวม: ${(itemData.weight * quantity).toFixed(2)} กิโลกรัม\n`;
-        } else {
-            document.getElementById('result').innerText = `ไม่พบรหัสพัสดุ: ${itemCode} ในระบบ`;
-            return;
+        const itemCodesList = document.getElementById('itemCodes');
+        for (const code in weightData) {
+            const option = document.createElement('option');
+            option.value = code;
+            option.text = `${code} - ${weightData[code].name}`;
+            itemCodesList.appendChild(option);
         }
-    }
-    document.getElementById('result').innerText = `น้ำหนักรวม: ${totalWeight.toFixed(2)} กิโลกรัม\nรายละเอียด:\n${details}`;
-});
 
+        // Populate the table with weight data
+        const weightTable = document.getElementById('weightTable');
+        for (const code in weightData) {
+            const item = weightData[code];
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${code}</td><td>${item.name}</td><td>${item.weight}</td>`;
+            weightTable.appendChild(row);
+        }
+
+        // Track number of items dynamically
+        let itemCount = 1;
+
+        function addItem() {
+            itemCount++;
+            const newItem = document.createElement('div');
+            newItem.className = 'item';
+            newItem.id = `item${itemCount}`;
+            newItem.innerHTML = `
+                <label for="itemCode${itemCount}">รหัสพัสดุ:</label>
+                <input list="itemCodes" id="itemCode${itemCount}" required>
+                <label for="quantity${itemCount}">จำนวน:</label>
+                <input type="number" id="quantity${itemCount}" required>
+                <button type="button" class="remove-button" onclick="removeItem(this)">ลบ</button>
+            `;
+            document.getElementById('itemsContainer').appendChild(newItem);
+        }
+
+        function removeItem(button) {
+            const item = button.parentElement;
+            item.remove();
+            // Recalculate itemCount
+            itemCount = document.querySelectorAll('#itemsContainer .item').length;
+        }
+
+        document.getElementById('weightForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let totalWeight = 0;
+            let details = '';
+
+            // Iterate over all items in the form
+            for (let i = 1; i <= itemCount; i++) {
+                const itemCode = document.getElementById(`itemCode${i}`)?.value.trim();
+                const quantity = parseInt(document.getElementById(`quantity${i}`)?.value, 10);
+                const itemData = weightData[itemCode];
+
+                if (itemData) {
+                    totalWeight += itemData.weight * quantity;
+                    details += `รายการที่ ${i}: ${itemData.name}, จำนวน: ${quantity}, น้ำหนักรวม: ${(itemData.weight * quantity).toFixed(2)} กิโลกรัม\n`;
+                } else if (itemCode) {
+                    document.getElementById('result').innerText = `ไม่พบรหัสพัสดุ: ${itemCode} ในระบบ`;
+                    return;
+                }
+            }
+            document.getElementById('result').innerText = `น้ำหนักรวม: ${totalWeight.toFixed(2)} กิโลกรัม\nรายละเอียด:\n${details}`;
+        });
     </script>
 </body>
 </html>
