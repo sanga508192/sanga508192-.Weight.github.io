@@ -122,7 +122,7 @@
             background-color: #007BFF;
             color: white;
         }
-</style>
+    </style>
 </head>
 <body>
     <h1>คำนวนน้ำหนักพัสดุชำรุดส่งคืนคลัง</h1>
@@ -359,10 +359,12 @@
             '1020089954': { name: 'สายทองแดงหุ้มฉนวนใช้ภายนอก 0.6/1 เควี 2.5 ตร.มม. รหัสรับคืนชำรุด 1-50-001-0009',   weight: 0.0644},
             '1020089957': { name: 'สายทองแดงหุ้มฉนวนใช้ภายนอก 0.6/1 เควี 10 ตร.มม. รหัสรับคืนชำรุด 1-50-001-0009',   weight: 0.1516},
             // เพิ่มข้อมูลอื่น ๆ ตามที่มีในตาราง
-            };
+};
 
-// Populate the datalist with item codes
         const itemCodesList = document.getElementById('itemCodes');
+        const weightTable = document.getElementById('weightTable');
+
+        // Populate the datalist with item codes
         for (const code in weightData) {
             const option = document.createElement('option');
             option.value = code;
@@ -371,7 +373,6 @@
         }
 
         // Populate the table with weight data
-        const weightTable = document.getElementById('weightTable');
         for (const code in weightData) {
             const item = weightData[code];
             const row = document.createElement('tr');
@@ -379,14 +380,12 @@
             weightTable.appendChild(row);
         }
 
-        // Track number of items dynamically
         let itemCount = 1;
 
         function addItem() {
             itemCount++;
             const newItem = document.createElement('div');
             newItem.className = 'item';
-            newItem.id = `item${itemCount}`;
             newItem.innerHTML = `
                 <label for="itemCode${itemCount}">รหัสพัสดุ:</label>
                 <input list="itemCodes" id="itemCode${itemCount}" required>
@@ -400,8 +399,20 @@
         function removeItem(button) {
             const item = button.parentElement;
             item.remove();
-            // Recalculate itemCount
-            itemCount = document.querySelectorAll('#itemsContainer .item').length;
+            updateItemIds(); // Update item IDs after removal
+        }
+
+        function updateItemIds() {
+            const items = document.querySelectorAll('#itemsContainer .item');
+            items.forEach((item, index) => {
+                const itemCodeInput = item.querySelector('input[list="itemCodes"]');
+                const quantityInput = item.querySelector('input[type="number"]');
+                itemCodeInput.id = `itemCode${index + 1}`;
+                quantityInput.id = `quantity${index + 1}`;
+                itemCodeInput.setAttribute('for', `itemCode${index + 1}`);
+                quantityInput.setAttribute('for', `quantity${index + 1}`);
+            });
+            itemCount = items.length; // Update itemCount to the new length
         }
 
         document.getElementById('weightForm').addEventListener('submit', function(event) {
@@ -409,21 +420,21 @@
             let totalWeight = 0;
             let details = '';
 
-            // Iterate over all items in the form
             for (let i = 1; i <= itemCount; i++) {
-                const itemCode = document.getElementById(`itemCode${i}`)?.value.trim();
-                const quantity = parseInt(document.getElementById(`quantity${i}`)?.value, 10);
+                const itemCode = document.getElementById(`itemCode${i}`).value;
+                const quantity = parseFloat(document.getElementById(`quantity${i}`).value) || 0;
                 const itemData = weightData[itemCode];
 
                 if (itemData) {
-                    totalWeight += itemData.weight * quantity;
-                    details += `รายการที่ ${i}: ${itemData.name}, จำนวน: ${quantity}, น้ำหนักรวม: ${(itemData.weight * quantity).toFixed(2)} กิโลกรัม\n`;
-                } else if (itemCode) {
-                    document.getElementById('result').innerText = `ไม่พบรหัสพัสดุ: ${itemCode} ในระบบ`;
-                    return;
+                    const weight = itemData.weight * quantity;
+                    totalWeight += weight;
+                    details += `รหัสพัสดุ: ${itemCode}, ชื่อพัสดุ: ${itemData.name}, จำนวน: ${quantity}, น้ำหนัก: ${weight.toFixed(2)} กิโลกรัม<br>`;
+                } else {
+                    details += `รหัสพัสดุ: ${itemCode} ไม่มีข้อมูลน้ำหนัก<br>`;
                 }
             }
-            document.getElementById('result').innerText = `น้ำหนักรวม: ${totalWeight.toFixed(2)} กิโลกรัม\nรายละเอียด:\n${details}`;
+
+            document.getElementById('result').innerHTML = `น้ำหนักรวม: ${totalWeight.toFixed(2)} กิโลกรัม<br><br>รายละเอียด:<br>${details}`;
         });
     </script>
 </body>
